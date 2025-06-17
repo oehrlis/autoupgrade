@@ -40,3 +40,5 @@ keystore/*
 keystore/*wallet*
 keystore/?wallet.*
 !keystore/README.md
+keystore/ewallet.p12
+keystore/cwallet.sso
