@@ -1,0 +1,12 @@
+
+{
+    "buildInfo": "{build.MOS_LINK=https://support.oracle.com/epmos/faces/DocumentDisplay?id=2485457.1, build.MOS_NOTE=2485457.1, build.date=2025/05/09 02:53:15 +0000, build.hash=3110a3d32, build.hash_date=2025/05/05 19:43:04 +0000, build.label=(HEAD, tag: v25.3, origin/stable_devel, stable_devel), build.max_target_version=19, build.supported_target_versions=19, build.type=production, build.version=25.3.250509}",
+    "commandLine": "-config etc/download_patch.cfg -load_password",
+    "configFile": "global.global_log_dir=/Users/stefan.oehrli/Development/github/oehrlis/autoupgrade/logs\nglobal.keystore=/Users/stefan.oehrli/Development/github/oehrlis/autoupgrade/keystore\nglobal.patch=RU:19.27,OPATCH,OJVM\npatch1.platform=LINUX.X64\npatch1.folder=/Users/stefan.oehrli/Development/github/oehrlis/autoupgrade/patches\npatch1.target_home=/tmp/dummy_patch1",
+    "startTime": "2025-06-17T21:50:50.322192",
+    "configProcessStatus": true,
+    "globalErrorLogs": [
+    ],
+    "jobs": [
+    ]
+}

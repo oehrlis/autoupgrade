@@ -1,0 +1,48 @@
+# ------------------------------------------------------------------------------
+# OraDBA - Oracle Database Infrastructure and Security, 5630 Muri, Switzerland
+# ------------------------------------------------------------------------------
+# Name.......: build-init-script-release.yml
+# Author.....: Stefan Oehrli (oes) stefan.oehrli@oradba.ch
+# Editor.....: Stefan Oehrli
+# Date.......: 2024.05.02
+# Version....: v0.3.1
+# Purpose....: GitHub Actions workflow to build init_project.sh and upload it
+#              to a release tagged 'latest'.
+# Notes......:
+#              - Designed to be triggered on push to main branch
+#              - Calls build_project.sh to embed template into init_project.sh
+#              - Uploads init_project.sh to GitHub Release using softprops/action-gh-release
+#              - Requires a Personal Access Token (GH_PAT) to bypass GITHUB_TOKEN limitations
+# License....: Apache License, Version 2.0
+# ------------------------------------------------------------------------------
+# Modified...:
+# 2025.05.02 oehrli - replaced GITHUB_TOKEN with GH_PAT for release upload
+# ------------------------------------------------------------------------------
+name: Build and Release init_project.sh
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release-init-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🛠 Make build script executable
+        run: chmod +x ./bin/build_project.sh
+
+      - name: 🧱 Run build_project.sh
+        run: ./bin/build_project.sh
+
+      - name: 🚀 Upload to latest GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          files: ./bin/init_project.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+# - End of file

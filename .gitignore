@@ -1,0 +1,36 @@
+
+# VS Code workspace
+*.code-workspace
+
+# Artefakte und generierte Dateien
+/artefacts/*
+!/artefacts/.gitkeep
+!/artefacts/*.pdf
+!/artefacts/*.xlsx
+!/artefacts/*.docx
+!/artefacts/*.pptx
+
+# Temporäre Dateien und Backup-Dateien
+*~
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Systemverzeichnisse
+__pycache__/
+*.log
+
+# Editor-spezifisch
+.vscode/
+.idea/
+
+# Python virtual environments
+.venv/
+env/
+
+# Ignore JAR files files in the jar/ folder
+jar/*.jar
+
+# Ignore Patch ZIP files in the patches/ folder
+patches/*.zip
