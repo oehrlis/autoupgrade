@@ -37,4 +37,6 @@ patches/*.zip
 
 # Ignore the actual wallet files stored in the keystore folder
 keystore/*
+keystore/*wallet*
+keystore/?wallet.*
 !keystore/README.md
