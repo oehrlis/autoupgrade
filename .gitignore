@@ -40,3 +40,6 @@ keystore/*
 !keystore/README.md
 keystore/ewallet.p12
 keystore/cwallet.sso
+
+# Ignore the logs directory
+logs/cfgtoollogs/*
