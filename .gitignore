@@ -34,3 +34,7 @@ jar/*.jar
 
 # Ignore Patch ZIP files in the patches/ folder
 patches/*.zip
+
+# Ignore the actual wallet files stored in the keystore folder
+keystore/*
+!keystore/README.md
