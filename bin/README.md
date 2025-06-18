@@ -55,6 +55,15 @@ curl -L -o autoupgrade-main.zip \
 
 This command downloads the current `main` branch as a ZIP archive for use with `update_project.sh`. Useful in offline scenarios where the file must be downloaded externally and transferred to the target system.
 
+Or all in one go:
+
+```bash
+curl -L -o /tmp/autoupgrade-main.zip \
+  https://github.com/oehrlis/autoupgrade/archive/refs/heads/main.zip
+update_project.sh /tmp/autoupgrade-main.zip
+rm -rf /tmp/autoupgrade-main.zip
+```
+
 ### `generate_pdf.sh`
 
 (Planned) Script to convert markdown-based documentation from the `doc/` folder into PDF using Pandoc and custom fonts. Ready to use once documentation content is available.
