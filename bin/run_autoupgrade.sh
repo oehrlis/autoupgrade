@@ -6,24 +6,24 @@
 # Author.....: Stefan Oehrli (oes) stefan.oehrli@oradba.ch
 # Editor.....: Stefan Oehrli
 # Date.......: 2025.06.17
-# Version....: v0.2.0
+# Version....: v0.4.0
 # Purpose....: Wrapper script to run Oracle AutoUpgrade with optional envsubst
-# Notes......: - Automatically resolves env variables if -config is specified
-#              - Passes all CLI parameters to AutoUpgrade
-#              - Checks for Java and autoupgrade.jar
+# Notes......: - Resolves -config path (absolute, relative to CWD or base)
+#              - Automatically expands env variables if -config is given
+#              - Sets AUTOUPGRADE_BASE based on script location
 # Reference..: https://github.com/oehrlis
 # License....: Apache License Version 2.0
 # ------------------------------------------------------------------------------
 # Modified...:
-# 2025.06.17 oehrli - added dynamic param handling and conditional config parsing
+# 2025.06.17 oehrli - added AUTOUPGRADE_BASE env variable
 # ------------------------------------------------------------------------------
 
 # - Default Values -------------------------------------------------------------
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPT_BASE=$(dirname "${SCRIPT_BIN_DIR}")
-AUTOUPGRADE_BASE="${SCRIPT_BASE}"
-SCRIPT_JAR_DIR="${SCRIPT_BASE}/jar"
+export AUTOUPGRADE_BASE="${SCRIPT_BASE}"                    # Set project base
+SCRIPT_JAR_DIR="${AUTOUPGRADE_BASE}/jar"
 JAR_FILE="${SCRIPT_JAR_DIR}/autoupgrade.jar"
 TMP_CFG=""
 # - EOF Default Values ---------------------------------------------------------
@@ -44,6 +44,28 @@ function resolve_config {
     envsubst < "${config_path}" > "${TMP_CFG}"
 }
 
+# Resolve the config path from absolute or relative reference
+function resolve_config_path {
+    local input_path="$1"
+
+    # Absolute path? Return it if it exists
+    if [[ "${input_path}" = /* ]]; then
+        [[ -f "${input_path}" ]] && echo "${input_path}" && return
+    fi
+
+    # Relative to current working directory?
+    if [[ -f "${PWD}/${input_path}" ]]; then
+        echo "${PWD}/${input_path}" && return
+    fi
+
+    # Relative to AUTOUPGRADE_BASE/etc?
+    if [[ -f "${AUTOUPGRADE_BASE}/etc/${input_path}" ]]; then
+        echo "${AUTOUPGRADE_BASE}/etc/${input_path}" && return
+    fi
+
+    # If not found
+    error_exit "Configuration file not found: ${input_path}"
+}
 # - EOF Functions --------------------------------------------------------------
 
 # - Parse Parameters -----------------------------------------------------------
@@ -54,7 +76,8 @@ RESOLVE_CONFIG=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -config)
-            CONFIG_FILE="$2"
+            RAW_CONFIG_PATH="$2"
+            CONFIG_FILE="$(resolve_config_path "${RAW_CONFIG_PATH}")"
             RESOLVE_CONFIG=true
             shift 2
             ;;
@@ -76,9 +99,11 @@ command -v java >/dev/null 2>&1 || error_exit "Java not found in PATH."
 
 # Handle config substitution if needed
 if [[ "${RESOLVE_CONFIG}" = true ]]; then
-    [[ -f "${CONFIG_FILE}" ]] || error_exit "Config file not found: ${CONFIG_FILE}"
     resolve_config "${CONFIG_FILE}"
     echo "Running AutoUpgrade with resolved config..."
+    echo "Using resolved config: ${TMP_CFG}"
+    [[ -f "${TMP_CFG}" ]] || error_exit "Resolved config file not found: ${TMP_CFG}"
+    # Run AutoUpgrade with resolved config
     java -jar "${JAR_FILE}" -config "${TMP_CFG}" "${ARGS[@]}"
     rm -f "${TMP_CFG}"
 else
