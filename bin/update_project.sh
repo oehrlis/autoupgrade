@@ -49,6 +49,8 @@ TMP_DIR=$(mktemp -d)
 BACKUP_DIR="${TARGET_DIR}_backup_$(date +%Y%m%d%H%M%S)"
 
 echo "🛠️ Starting in-place update of AutoUpgrade project in: ${TARGET_DIR}"
+echo "🛠️  Starting in-place update of AutoUpgrade project in: ${TARGET_DIR}"
+
 echo "🔄 Backing up existing project (excluding *.zip, *.log, cfgtoollogs)..."
 rsync -a \
     --exclude='patches/*.zip' \
