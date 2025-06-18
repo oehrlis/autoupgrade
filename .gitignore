@@ -9,6 +9,7 @@
 !/artefacts/*.xlsx
 !/artefacts/*.docx
 !/artefacts/*.pptx
+!/artefacts/*.md
 
 # Temporäre Dateien und Backup-Dateien
 *~
