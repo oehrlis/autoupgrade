@@ -1,46 +1,62 @@
 # Folder: bin
 
-This folder contains **utility scripts** used for initializing and managing the project structure. These scripts help maintain consistency, automate setup, and simplify documentation generation.
+This folder contains **utility scripts** used to manage Oracle AutoUpgrade-related
+operations, such as downloading patches, updating the AutoUpgrade JAR, and exporting
+documentation.
+
+These scripts are intended to simplify execution, enforce structure, and support
+cross-platform consistency.
 
 ## Included Scripts
 
-### `init_project.sh`
+### 🔧 `run_autoupgrade.sh`
 
-Unpacks a pre-embedded base64-encoded `.tgz` archive containing the full project structure.
+Wrapper script to run `autoupgrade.jar` with enhanced features:
 
-**Usage:**
+- Automatically sets `AUTOUPGRADE_BASE` based on its own location
+- Supports both absolute and relative `-config` paths
+- Resolves environment variables inside the config file using `envsubst`
+
+**Example usage:**
+```bash
+./bin/run_autoupgrade.sh -config etc/download_patch.cfg -mode download
+````
+
+This script is the recommended way to run any AutoUpgrade task using `.cfg` files
+located in the `etc/` folder.
+
+### 📥 `update_autoupgrade.sh`
+
+Downloads the latest `autoupgrade.jar` from Oracle and stores it in the `jar/` folder.
+If a JAR already exists and the content has changed, it creates a backup using the
+build version or timestamp.
+
+**Example usage:**
 
 ```bash
-./bin/init_project.sh [OPTIONS]
+./bin/update_autoupgrade.sh
 ```
 
-**Options:**
+This script ensures you're always working with the latest available AutoUpgrade tool.
 
-- `-d, --directory <dir>`  Destination directory (default: current directory)
-- `-n, --name <folder>`   Target folder name for extraction (default: `project-template`)
-- `-r, --root`         Extract only the contents of the template, not the wrapper folder
-- `-t, --tgz-only`      Only extract the `.tgz` file, do not unpack
-- `-f, --force`         Overwrite the target folder if it already exists
-- `-h, --help`         Display help and usage
+### 📝 `generate_pdf.sh`
 
-### `build_project.sh`
+Generates PDF documentation from Markdown sources in the `doc/` folder using Pandoc.
 
-Creates a `.tgz` archive from the project structure and updates the embedded payload in `init_project.sh`.
+**Note:** This script is included and ready, but only functional once documentation
+sources are available.
 
-**Usage:**
+**Example usage:**
 
 ```bash
-./bin/build_project.sh [OPTIONS]
+./bin/generate_pdf.sh doc/template.md
 ```
 
-**Options:**
-
-- `-d, --directory <dir>`  Directory to pack (default: project root)
-- `-n, --name <file>`    Name of the `.tgz` archive (default: `project_structure.tgz`)
-- `-i, --init-script <path>` Path to the `init_project.sh` script to update
-- `-h, --help`         Display help and usage
+PDF output is written to the `artefacts/` folder. Fonts used for styling are located
+in the `fonts/` directory.
 
 ## Notes
 
-- `build_project.sh` preserves LF line endings when updating the init script.
-- `init_project.sh` shows a project tree at the end, if the `tree` utility is installed.
+* All scripts follow a standardized OraDBA script header format
+* Scripts are compatible with macOS, Linux, and container-based environments
+* `run_autoupgrade.sh` is the preferred entry point for all AutoUpgrade use cases
