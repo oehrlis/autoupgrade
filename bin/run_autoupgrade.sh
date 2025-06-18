@@ -63,6 +63,11 @@ function resolve_config_path {
         echo "${AUTOUPGRADE_BASE}/etc/${input_path}" && return
     fi
 
+    # Or finally just look in AUTOUPGRADE_BASE/etc
+    if [[ -f "${AUTOUPGRADE_BASE}/etc/$(basename ${input_path})" ]]; then
+        echo "${AUTOUPGRADE_BASE}/etc/$(basename ${input_path})" && return
+    fi
+
     # If not found
     error_exit "Configuration file not found: ${input_path}"
 }
