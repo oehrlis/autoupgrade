@@ -97,7 +97,25 @@ done
 # - Main Script Logic ----------------------------------------------------------
 
 # Check Java availability
-command -v java >/dev/null 2>&1 || error_exit "Java not found in PATH."
+if ! command -v java >/dev/null 2>&1; then
+    echo "❌ Java is not available or not in PATH. Aborting."
+    exit 1
+fi
+
+# - Java Version Check ---------------------------------------------------------
+JAVA_VERSION_FULL=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f1)
+
+if [[ "$JAVA_MAJOR" == "1" ]]; then
+    JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f2)  # for Java 1.8
+fi
+
+if [[ "$JAVA_MAJOR" -ne 8 && "$JAVA_MAJOR" -ne 11 ]]; then
+    echo "❌ Unsupported Java Runtime Environment: $JAVA_VERSION_FULL"
+    echo "   AutoUpgrade must run with Java 8 or 11."
+    exit 1
+fi
+# - EOF Java Version Check -----------------------------------------------------
 
 # Check for autoupgrade.jar
 [[ -f "${JAR_FILE}" ]] || error_exit "AutoUpgrade JAR not found at ${JAR_FILE}"
