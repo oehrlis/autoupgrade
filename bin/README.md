@@ -1,62 +1,71 @@
 # Folder: bin
 
-This folder contains **utility scripts** used to manage Oracle AutoUpgrade-related
-operations, such as downloading patches, updating the AutoUpgrade JAR, and exporting
-documentation.
-
-These scripts are intended to simplify execution, enforce structure, and support
-cross-platform consistency.
+This folder contains **utility scripts** used for managing the AutoUpgrade project, including updating the Oracle `autoupgrade.jar`, generating documentation, and performing safe in-place updates of the project itself.
 
 ## Included Scripts
 
-### 🔧 `run_autoupgrade.sh`
+### `run_autoupgrade.sh`
 
-Wrapper script to run `autoupgrade.jar` with enhanced features:
+Wrapper script to run the Oracle `autoupgrade.jar` with enhanced behavior:
 
-- Automatically sets `AUTOUPGRADE_BASE` based on its own location
-- Supports both absolute and relative `-config` paths
-- Resolves environment variables inside the config file using `envsubst`
+- Resolves relative paths to the config file
+- Automatically substitutes environment variables (e.g. `$AUTOUPGRADE_BASE`) in config files
+- Ensures a supported Java version (8 or 11) is used
 
-**Example usage:**
+**Usage:**
+
 ```bash
 ./bin/run_autoupgrade.sh -config etc/download_patch.cfg -mode download
-````
+```
 
-This script is the recommended way to run any AutoUpgrade task using `.cfg` files
-located in the `etc/` folder.
+### `update_autoupgrade.sh`
 
-### 📥 `update_autoupgrade.sh`
+Downloads the latest version of Oracle's `autoupgrade.jar` into the `jar/` folder and creates a backup of the previous version based on the current build number or timestamp.
 
-Downloads the latest `autoupgrade.jar` from Oracle and stores it in the `jar/` folder.
-If a JAR already exists and the content has changed, it creates a backup using the
-build version or timestamp.
-
-**Example usage:**
+**Usage:**
 
 ```bash
 ./bin/update_autoupgrade.sh
 ```
 
-This script ensures you're always working with the latest available AutoUpgrade tool.
+### `update_project.sh`
 
-### 📝 `generate_pdf.sh`
+Safely updates the entire project from a GitHub ZIP archive. It unpacks the ZIP into a temporary folder, merges it into the current project structure, and preserves the following folders:
 
-Generates PDF documentation from Markdown sources in the `doc/` folder using Pandoc.
+- `etc/`
+- `keystore/`
+- `jar/`
+- `patches/`
+- `logs/`
 
-**Note:** This script is included and ready, but only functional once documentation
-sources are available.
+It also creates a lightweight backup of the current project (excluding `patches/*.zip`, `logs/*.log`, and `logs/cfgtoollogs/`).
 
-**Example usage:**
+**Usage:**
 
 ```bash
-./bin/generate_pdf.sh doc/template.md
+./bin/update_project.sh /path/to/autoupgrade-main.zip
+````
+
+**To download the latest project ZIP from GitHub:**
+
+```bash
+curl -L -o autoupgrade-main.zip \
+  https://github.com/oehrlis/autoupgrade/archive/refs/heads/main.zip
 ```
 
-PDF output is written to the `artefacts/` folder. Fonts used for styling are located
-in the `fonts/` directory.
+This command downloads the current `main` branch as a ZIP archive for use with `update_project.sh`. Useful in offline scenarios where the file must be downloaded externally and transferred to the target system.
+
+### `generate_pdf.sh`
+
+(Planned) Script to convert markdown-based documentation from the `doc/` folder into PDF using Pandoc and custom fonts. Ready to use once documentation content is available.
+
+**Usage:**
+
+```bash
+./bin/generate_pdf.sh
+```
 
 ## Notes
 
-* All scripts follow a standardized OraDBA script header format
-* Scripts are compatible with macOS, Linux, and container-based environments
-* `run_autoupgrade.sh` is the preferred entry point for all AutoUpgrade use cases
+- `run_autoupgrade.sh` and `update_project.sh` will automatically determine the project root and resolve paths consistently.
+- `update_project.sh` is ideal for offline environments or air-gapped servers where the project ZIP is downloaded externally.
