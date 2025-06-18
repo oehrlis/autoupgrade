@@ -66,7 +66,7 @@ if [[ -z "$NEW_SOURCE_DIR" ]]; then
 fi
 
 echo "🔁 Syncing updated project files into $TARGET_DIR ..."
-rsync -a --delete \
+rsync -a \
     --exclude='patches/*.zip' \
     --exclude='logs/cfgtoollogs/' \
     --exclude='logs/*.log' \
