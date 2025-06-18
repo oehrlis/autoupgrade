@@ -32,17 +32,17 @@ jobs:
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🛠 Make build script executable
-        run: chmod +x ./bin/build_project.sh
+      # - name: 🛠 Make build script executable
+      #   run: chmod +x ./bin/build_project.sh
 
-      - name: 🧱 Run build_project.sh
-        run: ./bin/build_project.sh
+      # - name: 🧱 Run build_project.sh
+      #   run: ./bin/build_project.sh
 
-      - name: 🚀 Upload to latest GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: latest
-          files: ./bin/init_project.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      # - name: 🚀 Upload to latest GitHub Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: latest
+      #     files: ./bin/init_project.sh
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 # - End of file
