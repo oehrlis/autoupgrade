@@ -1,62 +1,106 @@
-# Project Bootstrap Template
+# Oracle AutoUpgrade Utilities
 
-This repository provides a reusable template to bootstrap a standardized project structure for documentation, scripts, and demos.
+This repository provides a structured environment for working with Oracle's
+**AutoUpgrade** tool across various use cases. It includes reusable scripts,
+example configurations, and documentation to support practical AutoUpgrade
+scenarios.
 
-## 📦 Features
+The goal is to streamline typical Oracle database lifecycle operations by
+automating and documenting:
 
-- 🧰 Self-contained initialization script (`init_project.sh`) with embedded template payload
-- 🔁 Build script (`build_project.sh`) to package and update the payload
-- 📄 Markdown-based documentation and Pandoc-compatible PDF generation
-- 🧪 Compatible with macOS, Linux, and container-based dev environments
-- 🚀 GitHub Actions workflow publishes the latest script to a GitHub Release
+- Patching (including quarterly CPUs and RUs) in particular when done on a different system than the database server.
+- Multi-platform patch download automation
+- Migrations (e.g. Single Tenant to Multitenant)
+- Pre-checks and upgrade readiness validations
+- Secure keystore setup for patch access via My Oracle Support (MOS)
+
+## 🧰 Features
+
+- Script to download and update the latest `autoupgrade.jar`
+- Preconfigured patch download automation (multi-platform)
+- Secure keystore management for My Oracle Support credentials
+- Example upgrade configuration files (e.g., for DB 19c → 23ai)
+- Support for both standalone and containerized environments
+- PDF-ready documentation structure with Pandoc export
 
 ## 🚀 Getting Started
 
-To create a new project from this template:
+### 1. Download the latest `autoupgrade.jar`
 
 ```bash
-./bin/init_project.sh -d /path/to/target -n my-new-project
+./bin/update_autoupgrade.sh
 ```
 
-To update the embedded payload after making changes:
+### 2. Configure MOS credentials (if downloading patches)
 
 ```bash
-./bin/build_project.sh
+java -jar jar/autoupgrade.jar -config etc/download_patch.cfg -patch -load_password
 ```
 
-## 🌐 Quick Download via GitHub Release
+### 3. Run your specific use case
 
-You can download the latest generated `init_project.sh` script directly from GitHub:
+- **Download patches**:
 
-```bash
-curl -fsSL -H "Authorization: token $GH_PAT" \
-  -o init_project.sh \
-  https://github.com/<user>/<repo>/releases/download/latest/init_project.sh
-chmod +x init_project.sh
-```
+  ```bash
+  java -jar jar/autoupgrade.jar -config etc/download_patch.cfg -mode download
+  ```
 
-> Replace `<user>` and `<repo>` with your actual GitHub username and repository name.
+- **Run pre-checks or upgrade**:
+  See the sample upgrade config files under `etc/`.
 
 ## 📁 Folder Overview
 
-| Folder         | Description                                                      |
-|----------------|------------------------------------------------------------------|
-| `artefacts/`   | Generated files like PDFs, Excel, or Office docs                 |
-| `bin/`         | Utility scripts for setup and automation                         |
-| `doc/`         | Markdown documentation sources                                   |
-| `fonts/`       | Fonts used for PDF generation                                    |
-| `images/`      | Screenshots, diagrams, and logos                                 |
-| `notes/`       | Drafts, notes, and to-do items                                   |
-| `sql/`         | SQL scripts for validation or automation                         |
+| Folder       | Description                                                       |
+| ------------ | ----------------------------------------------------------------- |
+| `artefacts/` | Output files such as PDFs, reports, and exports                   |
+| `bin/`       | Shell scripts for automation (e.g. upgrade, patching, PDF export) |
+| `doc/`       | Markdown-based documentation and Pandoc templates                 |
+| `etc/`       | Sample AutoUpgrade config files (patching, upgrades, settings)    |
+| `fonts/`     | Custom fonts for PDF output                                       |
+| `images/`    | Diagrams, logos, and reference images                             |
+| `jar/`       | Location for `autoupgrade.jar` and versioned backups              |
+| `keystore/`  | Secure MOS credential keystore (excluded via `.gitignore`)        |
+| `logs/`      | AutoUpgrade-generated logs (patching, examiner, etc.)             |
+| `patches/`   | Oracle patch ZIPs downloaded via AutoUpgrade                      |
 
-## 🔐 GitHub Actions Setup
+## 🔐 Keystore (for Patch Download Only)
 
-This repo includes a workflow that automatically builds `init_project.sh` and uploads it to the `latest` release.
+A keystore is needed **only** if you want AutoUpgrade to download patches
+directly from My Oracle Support.
 
-To make this work:
-1. Push to `main`
-2. The GitHub Actions workflow will publish the script to the release
+Create it using:
 
-## 📝 License
+```bash
+java -jar jar/autoupgrade.jar -config etc/download_patch.cfg -patch -load_password
+```
 
-Apache License 2.0 — See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0)
+The actual wallet is stored in `keystore/` and excluded from Git.
+See [`keystore/README.md`](keystore/README.md) for details.
+
+## 🔧 Example Use Cases
+
+This repository supports a range of real-world AutoUpgrade use cases:
+
+- Apply Critical Patch Updates (CPU) or Release Updates (RU)
+- Download and manage platform-specific patch sets
+- Convert single-tenant DBs to multitenant architecture (CDB/PDB)
+- Pre-check and analyze upgrade readiness
+- Automate `autoupgrade.jar` lifecycle and configuration management
+
+## 📝 Documentation and PDF Export
+
+Write documentation in Markdown and generate PDFs using:
+
+```bash
+./bin/generate_pdf.sh doc/template.md
+```
+
+Fonts are stored under `fonts/`, output is written to `artefacts/`.
+
+## 📜 License
+
+Apache License 2.0 — See [LICENSE](LICENSE)
+
+## 👤 Maintainer
+
+Stefan Oehrli • [github.com/oehrlis](https://github.com/oehrlis)
