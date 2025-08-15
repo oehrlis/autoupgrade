@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ------------------------------------------------------------------------------
 # OraDBA - Oracle Database Infrastructure and Security, 5630 Muri, Switzerland
 # ------------------------------------------------------------------------------
@@ -71,6 +71,61 @@ function resolve_config_path {
     # If not found
     error_exit "Configuration file not found: ${input_path}"
 }
+
+#------------------------------------------------------------------------------
+# Function: require_java_8_or_11
+# Description: Ensure that Java 8 or 11 is available. On macOS, attempts to set
+#              JAVA_HOME using /usr/libexec/java_home if Java 8 or 11 is installed.
+#              Exits the script with an error message if neither is available.
+#------------------------------------------------------------------------------
+require_java_8_or_11() {
+  # Check if java is in PATH and of correct version
+  if command -v java &>/dev/null; then
+    JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    if [[ $JAVA_VERSION == 1.8* || $JAVA_VERSION == 8* ]]; then
+      echo "Java 8 found in PATH."
+      return 0
+    elif [[ $JAVA_VERSION == 11* ]]; then
+      echo "Java 11 found in PATH."
+      return 0
+    fi
+  fi
+
+  # If not valid, check for macOS and try to set JAVA_HOME
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    JAVA_CANDIDATE=""
+    JAVA_11=$(/usr/libexec/java_home -v 11 2>/dev/null)
+    JAVA_8=$(/usr/libexec/java_home -v 1.8 2>/dev/null)
+
+    if [[ -n $JAVA_11 ]]; then
+      JAVA_CANDIDATE="$JAVA_11"
+      echo "Java 11 found at $JAVA_CANDIDATE"
+    elif [[ -n $JAVA_8 ]]; then
+      JAVA_CANDIDATE="$JAVA_8"
+      echo "Java 8 found at $JAVA_CANDIDATE"
+    fi
+
+    if [[ -n $JAVA_CANDIDATE ]]; then
+      export JAVA_HOME="$JAVA_CANDIDATE"
+      export PATH="$JAVA_HOME/bin:$PATH"
+      echo "JAVA_HOME set to $JAVA_HOME"
+      return 0
+    fi
+  fi
+
+  echo "Error: Java 8 or 11 not found. Please set JAVA_HOME or ensure java is in PATH and is version 8 or 11." >&2
+  exit 1
+}
+
+#------------------------------------------------------------------------------
+# Main Script Logic
+#------------------------------------------------------------------------------
+
+require_java_8_or_11
+
+# Continue with the rest of your script here
+echo "Running main logic with Java: $(java -version 2>&1 | head -n 1)"
+
 # - EOF Functions --------------------------------------------------------------
 
 # - Parse Parameters -----------------------------------------------------------
@@ -108,6 +163,34 @@ JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f1)
 
 if [[ "$JAVA_MAJOR" == "1" ]]; then
     JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f2)  # for Java 1.8
+fi
+
+if [[ "$JAVA_MAJOR" -ne 8 && "$JAVA_MAJOR" -ne 11 ]]; then
+    # Check if we're on macOS and can find a valid Java version
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        JAVA_CANDIDATE=""
+        JAVA_11=$(/usr/libexec/java_home -v 11 2>/dev/null)
+        JAVA_8=$(/usr/libexec/java_home -v 1.8 2>/dev/null)
+
+        if [[ -n "$JAVA_11" ]]; then
+            JAVA_CANDIDATE="$JAVA_11"
+            echo "⚠️  Unsupported Java version detected. Switching to Java 11 at $JAVA_CANDIDATE"
+        elif [[ -n "$JAVA_8" ]]; then
+            JAVA_CANDIDATE="$JAVA_8"
+            echo "⚠️  Unsupported Java version detected. Switching to Java 8 at $JAVA_CANDIDATE"
+        fi
+
+        if [[ -n "$JAVA_CANDIDATE" ]]; then
+            export JAVA_HOME="$JAVA_CANDIDATE"
+            export PATH="$JAVA_HOME/bin:$PATH"
+
+            JAVA_VERSION_FULL=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+            JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f1)
+            if [[ "$JAVA_MAJOR" == "1" ]]; then
+                JAVA_MAJOR=$(echo "$JAVA_VERSION_FULL" | cut -d. -f2)
+            fi
+        fi
+    fi
 fi
 
 if [[ "$JAVA_MAJOR" -ne 8 && "$JAVA_MAJOR" -ne 11 ]]; then
